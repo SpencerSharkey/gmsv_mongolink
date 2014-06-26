@@ -114,6 +114,18 @@ int connectionLua::Insert(lua_State* state) {
 	return 0;
 }
 
+int connectionLua::SetDebug(lua_State* state) {
+	Connection* conn = fetchConnection(state);
+	if (!conn) return 0;
+
+	if (LUA->IsType(1, GarrysMod::Lua::Type::BOOL)) {
+		bool newDebug = LUA->GetBool(1);
+		conn->moduleDebug = newDebug;
+	} else {
+		LUA->ThrowError("connection:SetDebug() requires a bool parameter");
+	}
+	return 0;
+}
 
 bool Connection::Connect(std::string hostname) {
 	try {

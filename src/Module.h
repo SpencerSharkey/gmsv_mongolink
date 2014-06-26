@@ -23,4 +23,7 @@ extern GarrysMod::Lua::ILuaBase* g_Lua;
 #include "Lua.h"
 #include "Connection.h"
 
+#include "Util.h"
+
+
 #endif

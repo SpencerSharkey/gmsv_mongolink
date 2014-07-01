@@ -21,9 +21,10 @@ extern GarrysMod::Lua::ILuaBase* g_Lua;
 #include "mongo/client/dbclient.h"
 #include "Bootil/Bootil.h"
 #include "Lua.h"
+#include "Util.h"
 #include "Connection.h"
 
-#include "Util.h"
+
 
 
 #endif

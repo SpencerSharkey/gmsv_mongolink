@@ -1,5 +1,4 @@
 #include "Connection.h"
-#include "Util.h"
 #include <cstdlib>
 
 Connection * fetchConnection(lua_State* state) {
@@ -98,13 +97,25 @@ bool Connection::Auth(std::string db, std::string user, std::string pass) {
 }
 
 void Connection::Insert(std::string collection, mongo::BSONObj tbl) {
-	if (collection.find(".") == std::string::npos) {
-		collection = dbName + "." + collection;
+	collection = Slidefuse::Util::sanitizeCollection(this, collection);
+
+	if (moduleDebug) {
+		printf("Inserting into `%s`: %s", collection.c_str(), tbl.toString());
 	}
-	printf("Inserting into `%s`: %s", collection.c_str(), tbl.toString());
+
 	try {
 		conn.insert(collection, tbl);
+		std::string e = conn.getLastError();
+		if (!e.empty())
+			printf("MongoDB Insert Error: %s", e);
+
 	} catch (const mongo::DBException &e) {
 		printf("MongoDB Exception: %s", e.what());
 	}
+}
+
+void Connection::Query(std::string collection, mongo::BSONObj query) {
+	collection = Slidefuse::Util::sanitizeCollection(this, collection);
+	auto_ptr<mongo::DBClientCursor> cursor = conn.query(collection, query);
+	//todo - fix this and finish query shit
 }

@@ -15,7 +15,9 @@ public:
 	bool Connect(std::string hostname);
 	bool Auth(std::string db, std::string user, std::string pass);
 	void Insert(std::string collection, mongo::BSONObj tbl);
-	void Query(std::string collection, mongo::BSONObj query);
+	
+	//Query function uses lua state to manage tables during the execution.
+	int Query(lua_State* state, std::string collection, mongo::BSONObj query);
 };
 
 namespace connectionLua {

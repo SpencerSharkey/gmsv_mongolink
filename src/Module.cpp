@@ -44,6 +44,9 @@ GMOD_MODULE_OPEN() {
 		LUA->PushCFunction(connectionLua::Insert);
 		LUA->SetField(-2, "Insert");
 
+		LUA->PushCFunction(connectionLua::Query);
+		LUA->SetField(-2, "Query");
+
 		LUA->PushCFunction(connectionLua::SetDebug);
 		LUA->SetField(-2, "SetDebug");
 

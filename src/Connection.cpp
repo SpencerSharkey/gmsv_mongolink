@@ -65,13 +65,30 @@ int connectionLua::SetDebug(lua_State* state) {
 	Connection* conn = fetchConnection(state);
 	if (!conn) return 0;
 
-	if (LUA->IsType(1, GarrysMod::Lua::Type::BOOL)) {
-		bool newDebug = LUA->GetBool(1);
+	if (LUA->IsType(2, GarrysMod::Lua::Type::BOOL)) {
+		bool newDebug = LUA->GetBool(2);
 		conn->moduleDebug = newDebug;
 	} else {
 		LUA->ThrowError("connection:SetDebug() requires a bool parameter");
 	}
 	return 0;
+}
+
+int connectionLua::Query(lua_State* state) {
+	Connection* conn = fetchConnection(state);
+	if (!conn) return 0;
+
+	std::string collection = LUA->GetString(2);
+	LUA->GetUserdata(3);
+	int queryTable = (int)LUA->ReferenceCreate();
+
+	mongo::BSONObj tbl;
+	Slidefuse::Util::luaToBSON(state, queryTable, tbl);
+	int resultsTable = conn->Query(state, collection, tbl);
+
+	LUA->ReferencePush(resultsTable);
+	
+	return 1;
 }
 
 bool Connection::Connect(std::string hostname) {
@@ -97,7 +114,7 @@ bool Connection::Auth(std::string db, std::string user, std::string pass) {
 }
 
 void Connection::Insert(std::string collection, mongo::BSONObj tbl) {
-	collection = Slidefuse::Util::sanitizeCollection(this, collection);
+	collection = Slidefuse::Util::sanitizeCollection(dbName, collection);
 
 	if (moduleDebug) {
 		printf("Inserting into `%s`: %s", collection.c_str(), tbl.toString());
@@ -114,8 +131,23 @@ void Connection::Insert(std::string collection, mongo::BSONObj tbl) {
 	}
 }
 
-void Connection::Query(std::string collection, mongo::BSONObj query) {
-	collection = Slidefuse::Util::sanitizeCollection(this, collection);
-	auto_ptr<mongo::DBClientCursor> cursor = conn.query(collection, query);
-	//todo - fix this and finish query shit
+int Connection::Query(lua_State* state, std::string collection, mongo::BSONObj query) {
+	collection = Slidefuse::Util::sanitizeCollection(dbName, collection);
+	std::auto_ptr<mongo::DBClientCursor> cursor = conn.query(collection, query);
+
+	LUA->CreateTable();
+	int resultTable = LUA->ReferenceCreate();
+	int i = 1;
+	while (cursor->more()) {
+		int documentTable = Slidefuse::Util::JSONToLua(state, cursor->next().jsonString());
+
+		LUA->ReferencePush(resultTable);
+			LUA->PushNumber(i);
+			LUA->ReferencePush(documentTable);
+		LUA->SetTable(-3);
+
+		i++;
+	}
+
+	return resultTable;
 }

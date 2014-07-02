@@ -24,18 +24,22 @@ void Slidefuse::Util::luaToBSON(lua_State* state, int toJson, mongo::BSONObj &ob
 }
 
 int Slidefuse::Util::BSONToLua(lua_State* state, mongo::BSONObj &obj) {
-	std::string jsonString = obj::jsonString();
+	std::string jsonString = obj.jsonString();
+	return Slidefuse::Util::JSONToLua(state, jsonString);
+}
+
+int Slidefuse::Util::JSONToLua(lua_State* state, std::string jsonString) {
 	int destination;
 	LUA->PushSpecial(GarrysMod::Lua::SPECIAL_GLOB);
 		LUA->GetField(-1, "util");
 			LUA->GetField(-1, "JSONToTable");
-				LUA->PushString(jsonString);
+				LUA->PushString(jsonString.c_str());
 				if (LUA->PCall(1, 1, 0) != 0)
 					LUA->ThrowError(LUA->GetString(-1));
 				if (!LUA->IsType(-1, GarrysMod::Lua::Type::TABLE)) {
 					LUA->ThrowError("Function 'util.JSONToTable' must return a table");
 				}
-				LUA->GetUserdata(-1)
+				LUA->GetUserdata(-1);
 				destination = (int)LUA->ReferenceCreate();
 			LUA->Pop();
 		LUA->Pop();
@@ -74,9 +78,9 @@ void Slidefuse::Util::stackTrace(lua_State* state) {
 	printf("\n");
 }
 
-std::string Slidefuse::Util::sanitizeCollection(Connection conn, std::string collection) {
+std::string Slidefuse::Util::sanitizeCollection(std::string dbname, std::string collection) {
 	if (collection.find(".") == std::string::npos) {
-		collection = conn.dbName + "." + collection;
+		collection = dbname + "." + collection;
 	}
 
 	return collection;

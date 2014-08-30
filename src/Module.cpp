@@ -35,25 +35,25 @@ GMOD_MODULE_OPEN() {
 		LUA->Push(-1);
 		LUA->SetField(-2, "__index");
 
-		LUA->PushCFunction(connectionLua::ToString);
+		LUA->PushCFunction(LuaBridge::ToString);
 		LUA->SetField(-2, "__tostring");
 
-		LUA->PushCFunction(connectionLua::Connect);
+		LUA->PushCFunction(LuaBridge::Connect);
 		LUA->SetField(-2, "Connect");
 
-		LUA->PushCFunction(connectionLua::Auth);
+		LUA->PushCFunction(LuaBridge::Auth);
 		LUA->SetField(-2, "Auth");
 
-		LUA->PushCFunction(connectionLua::Insert);
+		LUA->PushCFunction(LuaBridge::Insert);
 		LUA->SetField(-2, "Insert");
 
-		LUA->PushCFunction(connectionLua::Query);
+		LUA->PushCFunction(LuaBridge::Query);
 		LUA->SetField(-2, "Query");
 
-		LUA->PushCFunction(connectionLua::ListCollections);
+		LUA->PushCFunction(LuaBridge::ListCollections);
 		LUA->SetField(-2, "ListCollections");
 
-		LUA->PushCFunction(connectionLua::SetDebug);
+		LUA->PushCFunction(LuaBridge::SetDebug);
 		LUA->SetField(-2, "SetDebug");
 
 	LUA->Pop();

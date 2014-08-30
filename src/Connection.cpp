@@ -157,23 +157,30 @@ void Connection::Insert(std::string collection, mongo::BSONObj tbl) {
 
 int Connection::Query(lua_State* state, std::string collection, mongo::BSONObj query) {
 	collection = Slidefuse::Util::sanitizeCollection(dbName, collection);
-	std::auto_ptr<mongo::DBClientCursor> cursor = conn.query(collection, query);
 
 	LUA->CreateTable();
 	int resultTable = LUA->ReferenceCreate();
-	int i = 1;
-	while (cursor->more()) {
-		int documentTable = Slidefuse::Util::JSONToLua(state, cursor->next().jsonString());
 
-		LUA->ReferencePush(resultTable);
-			LUA->PushNumber(i);
-			LUA->ReferencePush(documentTable);
-		LUA->SetTable(-3);
+	try {
+		std::auto_ptr<mongo::DBClientCursor> cursor = conn.query(collection, query);		
+		int i = 1;
+		while (cursor->more()) {
+			int documentTable = Slidefuse::Util::JSONToLua(state, cursor->next().jsonString());
 
-		i++;
+			LUA->ReferencePush(resultTable);
+				LUA->PushNumber(i);
+				LUA->ReferencePush(documentTable);
+			LUA->SetTable(-3);
+
+			i++;
+		}
+
+	} catch (const mongo::DBException &e) {
+		printf("MongoDB Query Exception: %s", e.what());
 	}
 
 	return resultTable;
+
 }
 
 int Connection::ListCollections(lua_State* state) {

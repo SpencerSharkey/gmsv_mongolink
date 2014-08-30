@@ -41,8 +41,8 @@ require("mongolink");
 
 local mongo = mongo.New()
 
-mongo:Connect("candidate.19.mongolayer.com:10269")
-mongo:Auth("sfuse-prod", "sfdbuser", "skinner452")
+mongo:Connect("kahana.mongohq.com:10034")
+mongo:Auth("gmod", "gmodtest", "gmodtestpass")
 
 PrintTable(mongo:ListCollections())
 

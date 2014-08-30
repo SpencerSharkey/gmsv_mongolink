@@ -9,6 +9,16 @@ Connection * fetchConnection(lua_State* state) {
 	return *(Connection**)LUA->GetUserdata(1);
 }
 
+int connectionLua::ToString(lua_State* state)  {
+	Connection* conn = fetchConnection(state);
+	if (!conn) {
+		LUA->PushNil();
+	} else {
+		LUA->PushString((conn->connUser + "@" + conn->connHostname + "/" + conn->dbName).c_str());
+	}
+	return 1;
+}
+
 int connectionLua::Connect(lua_State* state) {
 	Connection* conn = fetchConnection(state);
 	if (!conn) return 0;
@@ -91,7 +101,20 @@ int connectionLua::Query(lua_State* state) {
 	return 1;
 }
 
+int connectionLua::ListCollections(lua_State* state) {
+	Connection* conn = fetchConnection(state);
+	if (!conn) return 0;
+
+	int resultsTable = conn->ListCollections(state);
+
+	LUA->ReferencePush(resultsTable);
+
+	return 1;
+	
+}
+
 bool Connection::Connect(std::string hostname) {
+	connHostname = hostname;
 	try {
 		conn.connect(hostname);
 	} catch (const mongo::DBException &e) {
@@ -106,6 +129,7 @@ bool Connection::Auth(std::string db, std::string user, std::string pass) {
 	bool authed = conn.auth(db, user, pass, errMsg, true);
 	if (authed) {
 		dbName = db;
+		connUser = user;
 		return true;
 	} else {
 		puts(errMsg.c_str());
@@ -147,6 +171,24 @@ int Connection::Query(lua_State* state, std::string collection, mongo::BSONObj q
 		LUA->SetTable(-3);
 
 		i++;
+	}
+
+	return resultTable;
+}
+
+int Connection::ListCollections(lua_State* state) {
+	std::list<std::string> listed = conn.getCollectionNames(dbName);
+
+	LUA->CreateTable();
+	int resultTable = LUA->ReferenceCreate();
+	int index = 1;
+	for (std::list<std::string>::iterator i = listed.begin(); i != listed.end(); ++i) {
+		LUA->ReferencePush(resultTable);
+			LUA->PushNumber(index);
+			LUA->PushString(i->c_str());
+		LUA->SetTable(-3);
+
+		index++;
 	}
 
 	return resultTable;

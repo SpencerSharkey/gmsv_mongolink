@@ -33,6 +33,9 @@ The included binaries should be up to date with the source code unless stated ot
 ### Basic Usage ###
 You can check out the source code, of course, to see how the module works. But here's a simple example:
 
+**Make sure you have a copy of mongoclient.dll sitting next to your srcds.exe!!!**
+*(You can find the mongoclient.dll in the `/lib` folder of this repository)*
+
 ```lua
 require("mongolink");
 

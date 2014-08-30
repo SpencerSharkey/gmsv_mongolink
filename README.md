@@ -39,16 +39,16 @@ You can check out the source code, of course, to see how the module works. But h
 ```lua
 require("mongolink");
 
-local mongo = mongo.New()
+local db = mongo.New()
 
-mongo:Connect("kahana.mongohq.com:10034")
-mongo:Auth("gmod", "gmodtest", "gmodtestpass")
+db:Connect("kahana.mongohq.com:10034")
+db:Auth("gmod", "gmodtest", "gmodtestpass")
 
-PrintTable(mongo:ListCollections())
+PrintTable(db:ListCollections())
 
-mongo:Insert("testInsert", {test = true, day = 5})
+db:Insert("testInsert", {test = true, day = 5})
 
-PrintTable(mongo:Query("testInsert", {day = 5}))
+PrintTable(db:Query("testInsert", {day = 5}))
 ```
 
 
